@@ -1,23 +1,25 @@
 const express = require('express');
 const fetch = require('node-fetch');
+require('dotenv').config();
 const app = express();
 
 app.use('/', express.static('./demo-site'));
-// app.use(express.json());
+
+const port = process.env.PORT || 3000;
+const weather_api_key = process.env.WEATHER_API_KEY;
 
 app.get('/weather-report', (req, res) => {
     const { lat, lon } = req.query;
 
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fbaf44106f46a387d0ce59729b35b569`;
-
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weather_api_key}&units=metric`;
+    
     (async () => {
         try{
             const response = await fetch(url);
             const data = await response.json();
-            // console.log(data);
             const new_data = {
                 "location": data.name,
-                "temp": parseFloat(data.main.temp - 273.15).toFixed(2),
+                "temp": data.main.temp,
                 "weather": data.weather[0].description
             }
             res.json(new_data);
@@ -28,4 +30,4 @@ app.get('/weather-report', (req, res) => {
     })();
 })
 
-app.listen(3000);
+app.listen(port);
